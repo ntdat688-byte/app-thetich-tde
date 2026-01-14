@@ -143,9 +143,71 @@
         .math-key {
             @apply bg-slate-100 text-slate-700 font-mono text-xs rounded py-2 hover:bg-indigo-100 hover:text-indigo-700 transition-colors border border-slate-200 active:scale-95 flex items-center justify-center font-bold shadow-sm select-none;
         }
+
+        /* Animation for checkmark */
+        @keyframes scale-up-check {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale-check {
+            animation: scale-up-check 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 h-screen w-screen overflow-hidden relative">
+
+    <!-- LOGIN OVERLAY -->
+    <!-- Added background image 5.jpg and styling -->
+    <div id="login-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-700 bg-cover bg-center bg-no-repeat" style="background-image: url('5.jpg');">
+        <!-- Dark overlay for better text contrast -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-[3px]"></div>
+
+        <div id="login-box" class="relative bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-white/50 mx-4 transition-all duration-300">
+            
+            <!-- FORM CONTAINER -->
+            <div id="login-form-container">
+                <div class="text-center mb-6">
+                    <!-- Optional: Use Logo here if desired -->
+                    <!-- <img src="LOGO_7 (2).png" class="h-12 mx-auto mb-4" onerror="this.style.display='none'"> -->
+                    <h1 class="text-xl font-bold text-indigo-700 mb-2 uppercase">Hệ Thống Giáo Dục Tâm Đức</h1>
+                    <p class="text-slate-500 text-xs">Vui lòng đăng nhập để sử dụng phần mềm</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mật khẩu truy cập</label>
+                        <div class="relative">
+                            <input type="password" id="password-input" class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="Nhập mật khẩu...">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                        </div>
+                        <p id="login-error" class="text-red-500 text-xs mt-2 hidden font-medium flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i> Mật khẩu không chính xác!
+                        </p>
+                    </div>
+                    <button onclick="checkLogin()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold py-2.5 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                        <span>Đăng nhập</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="mt-6 text-center">
+                     <p class="text-[10px] text-slate-400">Thiết kế bởi: GV Nguyễn Thành Đạt</p>
+                </div>
+            </div>
+
+            <!-- SUCCESS CONTAINER (Hidden by default) -->
+            <div id="login-success-container" class="hidden flex-col items-center justify-center py-6 text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-scale-check shadow-inner">
+                    <i class="fa-solid fa-check text-4xl text-green-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-green-700 mb-1 animate-fade-in-up">Thành công!</h2>
+                <p class="text-slate-500 text-sm animate-pulse">Đang truy cập hệ thống...</p>
+            </div>
+
+        </div>
+    </div>
 
     <!-- Sidebar / Control Panel -->
     <aside id="sidebar" class="w-96 bg-white border-r border-slate-200 flex flex-col shadow-2xl h-full">
@@ -333,6 +395,54 @@
     </main>
 
     <script>
+        // --- LOGIN LOGIC ---
+        function checkLogin() {
+            const input = document.getElementById('password-input');
+            const error = document.getElementById('login-error');
+            const overlay = document.getElementById('login-overlay');
+            const formContainer = document.getElementById('login-form-container');
+            const successContainer = document.getElementById('login-success-container');
+            
+            if (input.value === 'tamducedu') {
+                // Success
+                
+                // 1. Hide form, show success
+                formContainer.classList.add('hidden');
+                successContainer.classList.remove('hidden');
+                successContainer.classList.add('flex'); // Enable flexbox
+
+                // Hide input keyboard (for mobile)
+                input.blur();
+
+                // 2. Wait 1.5s then fade out
+                setTimeout(() => {
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                    // Completely remove from DOM flow after transition
+                    setTimeout(() => { 
+                        overlay.style.display = 'none'; 
+                    }, 700);
+                }, 1500);
+
+            } else {
+                // Error: Show message and shake
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500', 'ring-1', 'ring-red-500');
+                
+                // Reset styling after user types again
+                input.addEventListener('input', function() {
+                    error.classList.add('hidden');
+                    input.classList.remove('border-red-500', 'ring-1', 'ring-red-500');
+                }, { once: true });
+            }
+        }
+
+        // Add Enter key support for login
+        document.getElementById('password-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkLogin();
+            }
+        });
+
         // --- 1. CONFIGURATION & STATE ---
         const config = {
             colors: ['#4F46E5', '#DC2626', '#059669', '#D97706', '#9333EA'], 
@@ -958,4 +1068,4 @@
 
     </script>
 </body>
-</html>"
+</html>
