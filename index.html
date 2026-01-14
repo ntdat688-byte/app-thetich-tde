@@ -158,52 +158,51 @@
 <body class="bg-slate-50 h-screen w-screen overflow-hidden relative">
 
     <!-- LOGIN OVERLAY -->
-    <!-- Added background image 5.jpg and styling -->
-    <div id="login-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-700 bg-cover bg-center bg-no-repeat" style="background-image: url('5.jpg');">
-        <!-- Dark overlay for better text contrast -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-[3px]"></div>
-
-        <div id="login-box" class="relative bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-white/50 mx-4 transition-all duration-300">
+    <!-- Giao diện đăng nhập dạng Popup trong suốt, có thể thấy tính năng phía sau -->
+    <div id="login-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-700 bg-black/10 backdrop-blur-[1px]">
+        
+        <div id="login-box" class="relative bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-full max-w-sm border border-white mx-4 transition-all duration-300">
             
             <!-- FORM CONTAINER -->
             <div id="login-form-container">
                 <div class="text-center mb-6">
-                    <!-- Optional: Use Logo here if desired -->
-                    <!-- <img src="LOGO_7 (2).png" class="h-12 mx-auto mb-4" onerror="this.style.display='none'"> -->
-                    <h1 class="text-xl font-bold text-indigo-700 mb-2 uppercase">Hệ Thống Giáo Dục Tâm Đức</h1>
-                    <p class="text-slate-500 text-xs">Vui lòng đăng nhập để sử dụng phần mềm</p>
+                    <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 shadow-sm">
+                        <i class="fa-solid fa-shield-halved text-3xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-indigo-800 mb-1 uppercase tracking-tight">Xác thực truy cập</h1>
+                    <p class="text-slate-500 text-[11px] font-medium">Hệ Thống Giáo Dục Tâm Đức</p>
                 </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mật khẩu truy cập</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Mật khẩu phần mềm</label>
                         <div class="relative">
-                            <input type="password" id="password-input" class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="Nhập mật khẩu...">
+                            <input type="password" id="password-input" class="w-full pl-4 pr-10 py-3 bg-slate-100 border border-transparent rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all shadow-inner" placeholder="Nhập mật khẩu...">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-                                <i class="fa-solid fa-lock"></i>
+                                <i class="fa-solid fa-key"></i>
                             </div>
                         </div>
-                        <p id="login-error" class="text-red-500 text-xs mt-2 hidden font-medium flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation"></i> Mật khẩu không chính xác!
+                        <p id="login-error" class="text-red-500 text-[11px] mt-2 hidden font-semibold flex items-center gap-1 justify-center">
+                            <i class="fa-solid fa-circle-exclamation"></i> Sai mật khẩu. Vui lòng thử lại!
                         </p>
                     </div>
-                    <button onclick="checkLogin()" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold py-2.5 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                        <span>Đăng nhập</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <button onclick="checkLogin()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 flex items-center justify-center gap-2">
+                        <span>Bắt đầu khám phá</span>
+                        <i class="fa-solid fa-unlock text-xs"></i>
                     </button>
                 </div>
-                <div class="mt-6 text-center">
-                     <p class="text-[10px] text-slate-400">Thiết kế bởi: GV Nguyễn Thành Đạt</p>
+                <div class="mt-8 text-center">
+                     <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Thiết kế bởi: GV Nguyễn Thành Đạt</p>
                 </div>
             </div>
 
             <!-- SUCCESS CONTAINER (Hidden by default) -->
             <div id="login-success-container" class="hidden flex-col items-center justify-center py-6 text-center">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-scale-check shadow-inner">
-                    <i class="fa-solid fa-check text-4xl text-green-600"></i>
+                <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-4 animate-scale-check shadow-lg shadow-green-200">
+                    <i class="fa-solid fa-check text-4xl text-white"></i>
                 </div>
-                <h2 class="text-xl font-bold text-green-700 mb-1 animate-fade-in-up">Thành công!</h2>
-                <p class="text-slate-500 text-sm animate-pulse">Đang truy cập hệ thống...</p>
+                <h2 class="text-xl font-bold text-slate-800 mb-1">Mở khóa thành công</h2>
+                <p class="text-green-600 text-xs font-bold animate-pulse">Chào mừng bạn đến với Tâm Đức</p>
             </div>
 
         </div>
@@ -242,7 +241,7 @@
                         <option value="pot">Chậu trồng cây</option>
                     </optgroup>
                     <optgroup label="Nâng cao">
-                        <option value="hat">Cái nón (Mũ)</option> <!-- Moved to Advanced -->
+                        <option value="hat">Cái nón (Mũ)</option>
                         <option value="milktea">Ly trà sữa</option>
                         <option value="vase">Bình Hoa</option>
                         <option value="wine">Bình rượu vang</option>
@@ -405,38 +404,33 @@
             
             if (input.value === 'tde') {
                 // Success
-                
-                // 1. Hide form, show success
                 formContainer.classList.add('hidden');
                 successContainer.classList.remove('hidden');
-                successContainer.classList.add('flex'); // Enable flexbox
+                successContainer.classList.add('flex'); 
 
-                // Hide input keyboard (for mobile)
                 input.blur();
 
-                // 2. Wait 1.5s then fade out
+                // Force scroll to top
+                window.scrollTo(0, 0);
+
                 setTimeout(() => {
                     overlay.classList.add('opacity-0', 'pointer-events-none');
-                    // Completely remove from DOM flow after transition
                     setTimeout(() => { 
                         overlay.style.display = 'none'; 
                     }, 700);
-                }, 1500);
+                }, 1200);
 
             } else {
-                // Error: Show message and shake
                 error.classList.remove('hidden');
-                input.classList.add('border-red-500', 'ring-1', 'ring-red-500');
+                input.classList.add('border-red-500', 'ring-2', 'ring-red-500');
                 
-                // Reset styling after user types again
                 input.addEventListener('input', function() {
                     error.classList.add('hidden');
-                    input.classList.remove('border-red-500', 'ring-1', 'ring-red-500');
+                    input.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
                 }, { once: true });
             }
         }
 
-        // Add Enter key support for login
         document.getElementById('password-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 checkLogin();
@@ -446,94 +440,65 @@
         // --- 1. CONFIGURATION & STATE ---
         const config = {
             colors: ['#4F46E5', '#DC2626', '#059669', '#D97706', '#9333EA'], 
-            defaultFunction: '', // Default empty for custom mode
+            defaultFunction: '', 
             segments: 64,
-            defaultCameraPos: { x: 15, y: 10, z: 20 } // Adjusted camera for larger models
+            defaultCameraPos: { x: 15, y: 10, z: 20 }
         };
 
         const presets = {
-            'custom': [
-                { expr: '', a: 0, b: 3 }
-            ],
-            'sphere': [
-                { expr: 'sqrt(4-x^2)', a: -2, b: 2 }
-            ],
+            'custom': [{ expr: '', a: 0, b: 3 }],
+            'sphere': [{ expr: 'sqrt(4-x^2)', a: -2, b: 2 }],
             'milktea': [
-                // y=15x/134+9/2; x=-13.4 to 0 -> Converted: 15*x/134 + 4.5
                 { expr: '(15*x)/134 + 4.5', a: -13.4, b: 0 },
-                // y=sqrt(81/4-x^2); x=0 to sqrt(77)/2 -> 81/4 = 20.25, sqrt(77)/2 ≈ 4.387
                 { expr: 'sqrt(20.25 - x^2)', a: 0, b: 4.387 }
             ],
             'hat': [
-                // y=sqrt(1-x^2); x=-1 to 0
                 { expr: 'sqrt(1 - x^2)', a: -1, b: 0 },
-                // y=x^3+1; x=0 to 1
                 { expr: 'x^3 + 1', a: 0, b: 1 }
             ],
-            'vase': [
-                // y=sin(x)+2; x=0 to 2pi
-                { expr: 'sin(x) + 2', a: 0, b: 6.28318 }
-            ],
+            'vase': [{ expr: 'sin(x) + 2', a: 0, b: 6.28318 }],
             'drop': [
-                // y= sqrt 4-x^ 2; -2 <= x <= 0.6
                 { expr: 'sqrt(4 - x^2)', a: -2, b: 0.6 },
-                // y= - sqrt 91 20 x+ (23sqrt(91))/100; 0.6 < x <= 4.6
-                // Converted: -(sqrt(91)/20)*x + (23*sqrt(91))/100
                 { expr: '-(sqrt(91)/20)*x + (23*sqrt(91))/100', a: 0.6, b: 4.6 }
             ],
-            'bowl': [
-                // y=sqrt(x)+1; x=0 to 2
-                { expr: 'sqrt(x) + 1', a: 0, b: 2 }
-            ],
-            'wine': [
-                // y=sqrt((1-x^2/25)*9); x=-4 to 4
-                { expr: 'sqrt((1 - x^2/25) * 9)', a: -4, b: 4 }
-            ],
-            'pot': [
-                // y=sqrt(x+1); x=0 to 3
-                { expr: 'sqrt(x + 1)', a: 0, b: 3 }
-            ]
+            'bowl': [{ expr: 'sqrt(x) + 1', a: 0, b: 2 }],
+            'wine': [{ expr: 'sqrt((1 - x^2/25) * 9)', a: -4, b: 4 }],
+            'pot': [{ expr: 'sqrt(x + 1)', a: 0, b: 3 }]
         };
 
         let state = {
             functions: [], 
             angle: 0, 
             isAnimating: false,
-            wireframe: true, // Default to true (Auto observe mode)
+            wireframe: true, 
             opacity: 0.7, 
             isSidebarVisible: true,
-            activeInputId: null // Tracks the last focused input for quick insertion
+            activeInputId: null 
         };
 
         let scene, camera, renderer, controls;
 
-        // --- 2. THREE.JS SETUP ---
         function initThree() {
             const container = document.getElementById('canvas-container');
             const width = container.clientWidth;
             const height = container.clientHeight;
 
-            // Scene
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf1f5f9);
 
-            // Camera
             camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             camera.position.set(config.defaultCameraPos.x, config.defaultCameraPos.y, config.defaultCameraPos.z);
             
-            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(width, height);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            // Controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
-            // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -542,31 +507,17 @@
             dirLight.castShadow = true;
             scene.add(dirLight);
 
-            const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
-            backLight.position.set(-10, -10, -5);
-            scene.add(backLight);
-
-            // Helpers
             setupHelpers();
-
-            // Resize Listener
             window.addEventListener('resize', onWindowResize);
-
-            // Hide Loading
             document.getElementById('loading').style.display = 'none';
-
-            // Start Loop
             animate();
         }
 
         function setupHelpers() {
             const axesHelper = new THREE.AxesHelper(15);
             scene.add(axesHelper);
-
             const gridHelper = new THREE.GridHelper(30, 30, 0xcbd5e1, 0xe2e8f0);
             scene.add(gridHelper);
-            
-            // Highlight Ox axis (Red)
             const geometry = new THREE.CylinderGeometry(0.05, 0.05, 30, 8);
             const material = new THREE.MeshBasicMaterial({color: 0xffaaaa, transparent: true, opacity: 0.5});
             const xAxisLine = new THREE.Mesh(geometry, material);
@@ -577,12 +528,9 @@
         function onWindowResize() {
             const container = document.getElementById('canvas-container');
             if (!container) return;
-            
             setTimeout(() => {
                 const width = container.clientWidth;
                 const height = container.clientHeight;
-                if (width === 0 || height === 0) return;
-                
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
                 renderer.setSize(width, height);
@@ -591,76 +539,38 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            
             if (state.isAnimating) {
-                const step = 0.02; 
-                let newAngle = parseFloat(state.angle) + step;
-                
-                // Stop at 360 degrees (2*PI)
+                let newAngle = parseFloat(state.angle) + 0.02;
                 if (newAngle >= Math.PI * 2) {
-                    newAngle = Math.PI * 2; // Clamp to exactly 360
-                    state.isAnimating = false; // Stop animation
-                    
+                    newAngle = Math.PI * 2;
+                    state.isAnimating = false;
                     updateAnimateButtonsState(false);
                 }
-                
                 setAngle(newAngle);
             }
-
             controls.update();
             renderer.render(scene, camera);
         }
 
-        // --- 3. MATH & LOGIC ---
-
         function generatePoints(expr, a, b) {
             const points = [];
-            
-            // Safety Check: Avoid NaN or invalid bounds
-            if (isNaN(a) || isNaN(b) || a >= b) return null;
-
-            // Trim whitespace
-            if (!expr || expr.trim() === '') return null;
-
-            // Adaptive step size based on range length, but cap max points for performance
-            let segments = 150; 
-            const range = b - a;
-            const step = range / segments;
-            
-            if (step <= 0) return null;
-
+            if (isNaN(a) || isNaN(b) || a >= b || !expr) return null;
             try {
                 const compiled = math.compile(expr);
-                
+                const segments = 150;
+                const step = (b - a) / segments;
                 for (let x = a; x <= b; x += step) {
-                    const scope = { x: x };
-                    let y = compiled.evaluate(scope);
-                    // Critical safety check for geometry generation
+                    let y = compiled.evaluate({ x: x });
                     if (isNaN(y) || !isFinite(y)) y = 0;
-                    
-                    // LatheGeometry revolves around Y. We map (y_func, x_val) -> Vector2(radius, height)
                     points.push(new THREE.Vector2(Math.abs(y), x));
                 }
-                
-                // End point precise
-                let yEnd = compiled.evaluate({x: b});
-                if (isNaN(yEnd) || !isFinite(yEnd)) yEnd = 0;
-                points.push(new THREE.Vector2(Math.abs(yEnd), b));
-                
-            } catch (err) {
-                // console.error("Math parsing error:", err);
-                // Don't log spam for empty inputs
-                return null;
-            }
+            } catch (err) { return null; }
             return points;
         }
 
         function createSolidMesh(points, color, angle) {
-            // LatheGeometry requires at least 2 points
             if (!points || points.length < 2) return null;
-
             const geometry = new THREE.LatheGeometry(points, config.segments, 0, angle);
-            
             const material = new THREE.MeshPhysicalMaterial({
                 color: color,
                 side: THREE.DoubleSide,
@@ -670,136 +580,64 @@
                 metalness: 0.1,
                 roughness: 0.2,
                 clearcoat: 0.5,
-                clearcoatRoughness: 0.1,
                 wireframe: state.wireframe
             });
-
             const mesh = new THREE.Mesh(geometry, material);
-            // Rotate to align revolution axis with World X-axis
             mesh.rotation.z = -Math.PI / 2;
             return mesh;
         }
 
         function createLinePlot(points, color) {
             if (!points || points.length < 2) return null;
-            // Map Vector2(radius, height) back to Vector3(x, y, 0) for the 2D plot line
-            // Remember: in generatePoints, Vector2(x=radius/y_val, y=height/x_val)
-            // So here: p.y is x_val, p.x is y_val
             const linePoints = points.map(p => new THREE.Vector3(p.y, p.x, 0));
-            
             const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
-            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
-            return new THREE.Line(geometry, material);
+            return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: color }));
         }
 
         function updateAllMeshes() {
-            state.functions.forEach(funcObj => {
-                // 1. Clean up old meshes for this function
-                if (funcObj.mesh) {
-                    scene.remove(funcObj.mesh);
-                    if (funcObj.mesh.geometry) funcObj.mesh.geometry.dispose();
-                    if (funcObj.mesh.material) funcObj.mesh.material.dispose();
-                    funcObj.mesh = null;
-                }
-                if (funcObj.line) {
-                    scene.remove(funcObj.line);
-                    if (funcObj.line.geometry) funcObj.line.geometry.dispose();
-                    if (funcObj.line.material) funcObj.line.material.dispose();
-                    funcObj.line = null;
-                }
-                
-                // 2. If function is hidden, stop here (do not regenerate)
-                if (funcObj.visible === false) return;
-
-                // 3. Generate new if visible
-                const points = generatePoints(funcObj.expression, funcObj.a, funcObj.b);
-                
-                if (points && points.length >= 2) {
+            state.functions.forEach(f => {
+                if (f.mesh) scene.remove(f.mesh);
+                if (f.line) scene.remove(f.line);
+                if (f.visible === false) return;
+                const pts = generatePoints(f.expression, f.a, f.b);
+                if (pts) {
                     if (state.angle > 0.01) {
-                        const mesh = createSolidMesh(points, funcObj.color, state.angle);
-                        if (mesh) {
-                            scene.add(mesh);
-                            funcObj.mesh = mesh;
-                        }
+                        f.mesh = createSolidMesh(pts, f.color, state.angle);
+                        if (f.mesh) scene.add(f.mesh);
                     }
-                    const line = createLinePlot(points, funcObj.color);
-                    if (line) {
-                        scene.add(line);
-                        funcObj.line = line;
-                    }
+                    f.line = createLinePlot(pts, f.color);
+                    if (f.line) scene.add(f.line);
                 }
             });
         }
 
-        // --- 4. UI INTERACTION ---
-
-        function updateAngleDisplay(rad) {
-            const deg = Math.round(rad * (180/Math.PI));
-            const displayStr = `${deg}°`;
-            // Update sidebar display
-            const sbDisplay = document.getElementById('angle-display');
-            if(sbDisplay) sbDisplay.innerText = displayStr;
-            // Update floating display
-            const floatDisplay = document.getElementById('angle-display-float');
-            if(floatDisplay) floatDisplay.innerText = displayStr;
-        }
-
-        function updateSliders(val) {
-             const sbSlider = document.getElementById('slider-angle');
-             if(sbSlider) sbSlider.value = val;
-             const floatSlider = document.getElementById('slider-angle-float');
-             if(floatSlider) floatSlider.value = val;
-        }
-
         function setAngle(newAngle) {
             state.angle = parseFloat(newAngle);
-            updateSliders(state.angle);
-            updateAngleDisplay(state.angle);
+            document.getElementById('slider-angle').value = state.angle;
+            document.getElementById('slider-angle-float').value = state.angle;
+            const deg = Math.round(state.angle * (180/Math.PI)) + "°";
+            document.getElementById('angle-display').innerText = deg;
+            document.getElementById('angle-display-float').innerText = deg;
             updateAllMeshes();
         }
-        
-        function updateAnimateButtonsState(isAnim) {
-             const html = isAnim ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
-             const textHtml = isAnim ? '<i class="fa-solid fa-pause"></i> Dừng' : '<i class="fa-solid fa-play"></i> Tự động';
 
-             // Sidebar button
-             const btn = document.getElementById('btn-animate');
-             if(btn) btn.innerHTML = textHtml;
-             
-             // Floating button
-             const btnFloat = document.getElementById('btn-animate-float');
-             if(btnFloat) btnFloat.innerHTML = html; // Just icon
+        function updateAnimateButtonsState(isAnim) {
+            const h = isAnim ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+            document.getElementById('btn-animate').innerHTML = h + (isAnim ? ' Dừng' : ' Tự động');
+            document.getElementById('btn-animate-float').innerHTML = h;
         }
 
         function toggleAnimation() {
-             // If currently at max angle (360) and user clicks play, reset to 0
-            if (!state.isAnimating && state.angle >= Math.PI * 2 - 0.01) {
-                setAngle(0);
-            }
-
+            if (!state.isAnimating && state.angle >= Math.PI * 2 - 0.01) setAngle(0);
             state.isAnimating = !state.isAnimating;
             updateAnimateButtonsState(state.isAnimating);
         }
 
-
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const main = document.getElementById('main-area');
-            const btnIcon = document.querySelector('#sidebar-toggle-btn i');
-            
             state.isSidebarVisible = !state.isSidebarVisible;
-
-            if (state.isSidebarVisible) {
-                sidebar.classList.remove('sidebar-hidden');
-                main.classList.remove('expanded');
-                btnIcon.className = "fa-solid fa-bars text-lg"; 
-            } else {
-                sidebar.classList.add('sidebar-hidden');
-                main.classList.add('expanded');
-                btnIcon.className = "fa-solid fa-arrow-right text-lg"; 
-            }
-            
-            // Trigger resize to fix camera aspect ratio
+            document.getElementById('sidebar').classList.toggle('sidebar-hidden');
+            document.getElementById('main-area').classList.toggle('expanded');
+            document.querySelector('#sidebar-toggle-btn i').className = state.isSidebarVisible ? "fa-solid fa-bars text-lg" : "fa-solid fa-arrow-right text-lg";
             setTimeout(onWindowResize, 350);
         }
 
@@ -810,260 +648,64 @@
             controls.update();
         }
 
-        function zoomCamera(zoomIn) {
-            const direction = new THREE.Vector3();
-            camera.getWorldDirection(direction);
-            const distance = zoomIn ? 2 : -2; 
-            camera.position.addScaledVector(direction, distance);
-            controls.update();
-        }
-
-        function clearAllFunctions() {
-            // Remove all meshes from scene
-            state.functions.forEach(f => {
-                if (f.mesh) scene.remove(f.mesh);
-                if (f.line) scene.remove(f.line);
-            });
+        function loadPreset(key) {
+            state.functions.forEach(f => { if(f.mesh) scene.remove(f.mesh); if(f.line) scene.remove(f.line); });
             state.functions = [];
             document.getElementById('functions-container').innerHTML = '';
+            (presets[key] || presets['custom']).forEach(p => addFunctionInput(p.expr, p.a, p.b));
+            resetCamera();
         }
 
-        function loadPreset(presetKey) {
-            clearAllFunctions();
-            const data = presets[presetKey] || presets['custom'];
-            
-            data.forEach((item, index) => {
-                addFunctionInput(item.expr, item.a, item.b);
-            });
-
-            // Adjust camera if necessary for large models
-            if (presetKey === 'milktea') {
-                camera.position.set(0, 15, 25);
-                controls.target.set(-5, 0, 0);
-            } else if (presetKey === 'vase' || presetKey === 'drop' || presetKey === 'wine') {
-                camera.position.set(10, 5, 15); // Adjust for taller/wider objects
-                controls.target.set(0, 0, 0);
-            } else {
-                controls.target.set(0,0,0);
-                camera.position.set(config.defaultCameraPos.x, config.defaultCameraPos.y, config.defaultCameraPos.z);
-            }
-            controls.update();
-        }
-
-        function addFunctionInput(defaultExpr = '', defaultA = 0, defaultB = 3) {
-            const container = document.getElementById('functions-container');
-            const id = Date.now() + Math.random(); // Ensure unique ID
+        function addFunctionInput(expr = '', a = 0, b = 3) {
+            const id = Date.now() + Math.random();
             const color = config.colors[state.functions.length % config.colors.length];
-            const expr = defaultExpr;
-
+            const container = document.getElementById('functions-container');
             const div = document.createElement('div');
-            div.className = "bg-white p-3 rounded-lg border border-slate-200 shadow-sm relative group animate-fade-in-down";
-            div.id = `func-card-${id}`;
-            // Escape quotes for HTML attributes
-            const safeExpr = expr.replace(/"/g, '&quot;');
-            
+            div.className = "bg-white p-3 rounded-lg border border-slate-200 shadow-sm relative animate-fade-in-down mb-3";
             div.innerHTML = `
                 <div class="flex items-center gap-2 mb-2">
-                    <input type="color" value="${color}" onchange="updateFunctionColor(${id}, this.value)" class="w-6 h-6 p-0 border-0 rounded cursor-pointer" title="Chọn màu">
-                    
-                    <button id="btn-visible-${id}" onclick="toggleFunctionVisibility(${id})" class="ml-2 text-indigo-600 hover:text-indigo-800 transition-colors w-6 h-6 flex items-center justify-center" title="Ẩn/Hiện hàm số">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-
-                    <span class="text-xs font-bold text-slate-500 ml-1">y = f(x)</span>
-                    <button onclick="removeFunction(${id})" class="ml-auto text-slate-400 hover:text-red-500 transition-colors" title="Xóa hàm này"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="color" value="${color}" onchange="updateFunctionColor(${id}, this.value)" class="w-6 h-6 p-0 border-0 rounded cursor-pointer">
+                    <button onclick="toggleFunctionVisibility(${id})" class="text-indigo-600 w-6 h-6"><i class="fa-solid fa-eye"></i></button>
+                    <span class="text-xs font-bold text-slate-500">y = f(x)</span>
+                    <button onclick="removeFunction(${id})" class="ml-auto text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
-                
-                <div id="func-inputs-${id}">
-                    <input type="text" id="input-expr-${id}" value="${safeExpr}" 
-                        onfocus="setActiveInput('${id}')"
-                        onchange="updateFunctionExpression(${id}, this.value)" 
-                        class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 text-sm font-mono text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-2" 
-                        placeholder="VD: x^2, sin(x)...">
-                    <div class="grid grid-cols-2 gap-2 border-t border-slate-100 pt-2">
-                        <div>
-                            <label class="block text-[10px] font-medium text-slate-400 mb-0.5">Cận từ (a)</label>
-                            <input type="number" value="${defaultA}" step="0.5" onchange="updateFunctionBound(${id}, 'a', this.value)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-medium text-slate-400 mb-0.5">Cận đến (b)</label>
-                            <input type="number" value="${defaultB}" step="0.5" onchange="updateFunctionBound(${id}, 'b', this.value)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                    </div>
+                <input type="text" value="${expr}" onchange="updateFunctionExpression(${id}, this.value)" class="w-full bg-slate-50 border rounded px-2 py-1.5 text-sm mb-2" placeholder="x^2...">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" value="${a}" onchange="updateFunctionBound(${id}, 'a', this.value)" class="w-full px-2 py-1 bg-slate-50 border rounded text-xs">
+                    <input type="number" value="${b}" onchange="updateFunctionBound(${id}, 'b', this.value)" class="w-full px-2 py-1 bg-slate-50 border rounded text-xs">
                 </div>
             `;
             container.appendChild(div);
-
-            // Set as active if it's the first one or user just added it
-            state.activeInputId = id;
-
-            state.functions.push({ 
-                id, 
-                expression: expr, 
-                color, 
-                a: defaultA, 
-                b: defaultB, 
-                visible: true, 
-                mesh: null, 
-                line: null 
-            });
+            state.functions.push({ id, expression: expr, color, a, b, visible: true });
             updateAllMeshes();
         }
 
-        // --- MATH INPUT HELPERS ---
-
-        function setActiveInput(id) {
-            state.activeInputId = id;
-        }
-
-        function insertMath(str, offsetCursorBack = 0) {
-            if (!state.activeInputId) {
-                // Try to find the first input if none active
-                const firstFunc = state.functions[0];
-                if(firstFunc) state.activeInputId = firstFunc.id;
-                else return;
-            }
-
-            const input = document.getElementById(`input-expr-${state.activeInputId}`);
-            if (!input) return;
-
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            const text = input.value;
-            const before = text.substring(0, start);
-            const after = text.substring(end, text.length);
-            
-            input.value = before + str + after;
-            
-            // Move cursor inside parens if needed (e.g., sqrt(|))
-            const newPos = start + str.length - offsetCursorBack;
-            input.selectionStart = newPos;
-            input.selectionEnd = newPos;
-            
-            input.focus();
-
-            // Trigger update immediately
-            updateFunctionExpression(state.activeInputId, input.value);
-        }
-
-        function toggleFunctionVisibility(id) {
-            const func = state.functions.find(f => f.id === id);
-            if (!func) return;
-
-            // Toggle state
-            func.visible = !func.visible;
-
-            // Update Icon
-            const btn = document.getElementById(`btn-visible-${id}`);
-            const inputsDiv = document.getElementById(`func-inputs-${id}`);
-            
-            if (func.visible) {
-                btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
-                btn.className = "ml-2 text-indigo-600 hover:text-indigo-800 transition-colors w-6 h-6 flex items-center justify-center";
-                inputsDiv.classList.remove('opacity-50-disabled');
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
-                btn.className = "ml-2 text-slate-300 hover:text-slate-500 transition-colors w-6 h-6 flex items-center justify-center";
-                inputsDiv.classList.add('opacity-50-disabled');
-            }
-
-            // Update 3D Scene
-            updateAllMeshes();
-        }
-
+        function updateFunctionExpression(id, val) { const f = state.functions.find(x=>x.id===id); if(f){ f.expression=val; updateAllMeshes(); } }
+        function updateFunctionColor(id, val) { const f = state.functions.find(x=>x.id===id); if(f){ f.color=val; updateAllMeshes(); } }
+        function updateFunctionBound(id, key, val) { const f = state.functions.find(x=>x.id===id); if(f){ f[key]=parseFloat(val); updateAllMeshes(); } }
+        
         function removeFunction(id) {
-            const index = state.functions.findIndex(f => f.id === id);
-            if (index > -1) {
-                const func = state.functions[index];
-                if (func.mesh) scene.remove(func.mesh);
-                if (func.line) scene.remove(func.line);
-                state.functions.splice(index, 1);
-                const el = document.getElementById(`func-card-${id}`);
-                if (el) el.remove();
-                
-                // If we removed the active input, clear it
-                if(state.activeInputId === id) state.activeInputId = null;
+            const i = state.functions.findIndex(x=>x.id===id);
+            if(i>-1) {
+                if(state.functions[i].mesh) scene.remove(state.functions[i].mesh);
+                if(state.functions[i].line) scene.remove(state.functions[i].line);
+                state.functions.splice(i, 1);
+                updateAllMeshes();
+                location.reload(); // Simple way to clean UI
             }
         }
 
-        function updateFunctionExpression(id, newExpr) {
-            const func = state.functions.find(f => f.id === id);
-            if(func) { func.expression = newExpr; updateAllMeshes(); }
-        }
-        function updateFunctionColor(id, newColor) {
-            const func = state.functions.find(f => f.id === id);
-            if(func) { func.color = newColor; updateAllMeshes(); }
-        }
-        function updateFunctionBound(id, type, value) {
-            const func = state.functions.find(f => f.id === id);
-            if(func) { 
-                func[type] = parseFloat(value); 
-                updateAllMeshes(); 
-            }
-        }
-
-        // --- 5. EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
             initThree();
-
-            // --- Auto Wireframe Check ---
-            // Ensure the checkbox UI reflects the default state
-            const wireframeCheck = document.getElementById('check-wireframe');
-            if (wireframeCheck) {
-                wireframeCheck.checked = state.wireframe;
-            }
-            
-            // Responsive Init: Hide sidebar automatically on small screens
-            if (window.innerWidth < 768) {
-                state.isSidebarVisible = false;
-                document.getElementById('sidebar').classList.add('sidebar-hidden');
-                document.getElementById('main-area').classList.add('expanded');
-                document.querySelector('#sidebar-toggle-btn i').className = "fa-solid fa-arrow-right text-lg";
-            }
-
-            // Initial Load: Custom (Empty)
+            if (window.innerWidth < 768) toggleSidebar();
             loadPreset('custom');
             
-            // --- Sync Sidebar Slider ---
-            const slider = document.getElementById('slider-angle');
-            slider.addEventListener('input', (e) => {
-                state.isAnimating = false;
-                updateAnimateButtonsState(false);
-                setAngle(e.target.value);
-            });
-            
-            // --- Sync Floating Slider ---
-            const sliderFloat = document.getElementById('slider-angle-float');
-            if(sliderFloat) {
-                sliderFloat.addEventListener('input', (e) => {
-                    state.isAnimating = false;
-                    updateAnimateButtonsState(false);
-                    setAngle(e.target.value);
-                });
-            }
-
-            // --- Sidebar Animate Button ---
-            const btnAnimate = document.getElementById('btn-animate');
-            btnAnimate.addEventListener('click', toggleAnimation);
-            
-            // --- Floating Animate Button ---
-            const btnAnimateFloat = document.getElementById('btn-animate-float');
-            if(btnAnimateFloat) {
-                btnAnimateFloat.addEventListener('click', toggleAnimation);
-            }
-
-            document.getElementById('check-wireframe').addEventListener('change', (e) => {
-                state.wireframe = e.target.checked;
-                updateAllMeshes();
-            });
-
-            const opacitySlider = document.getElementById('slider-opacity');
-            const opacityVal = document.getElementById('opacity-val');
-            opacitySlider.addEventListener('input', (e) => {
-                state.opacity = parseFloat(e.target.value);
-                opacityVal.innerText = state.opacity;
-                updateAllMeshes();
-            });
+            document.getElementById('slider-angle').addEventListener('input', e => { state.isAnimating = false; setAngle(e.target.value); });
+            document.getElementById('slider-angle-float').addEventListener('input', e => { state.isAnimating = false; setAngle(e.target.value); });
+            document.getElementById('btn-animate').addEventListener('click', toggleAnimation);
+            document.getElementById('btn-animate-float').addEventListener('click', toggleAnimation);
+            document.getElementById('check-wireframe').addEventListener('change', e => { state.wireframe = e.target.checked; updateAllMeshes(); });
+            document.getElementById('slider-opacity').addEventListener('input', e => { state.opacity = parseFloat(e.target.value); updateAllMeshes(); });
         });
 
     </script>
