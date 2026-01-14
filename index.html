@@ -158,8 +158,8 @@
 <body class="bg-slate-50 h-screen w-screen overflow-hidden relative">
 
     <!-- LOGIN OVERLAY -->
-    <!-- Added background image 5.jpg and styling -->
-    <div id="login-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-700 bg-cover bg-center bg-no-repeat" style="background-image: url('5.jpg');">
+    <!-- Added background image 5.jpg and styling with fallback color -->
+    <div id="login-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-700 bg-cover bg-center bg-no-repeat bg-slate-900" style="background-image: url('5.jpg');">
         <!-- Dark overlay for better text contrast -->
         <div class="absolute inset-0 bg-black/40 backdrop-blur-[3px]"></div>
 
