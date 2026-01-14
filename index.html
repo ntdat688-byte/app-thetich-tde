@@ -87,8 +87,6 @@
                 box-shadow: 5px 0 15px rgba(0,0,0,0.1);
             }
             
-            /* On mobile, main content should NEVER have left margin, 
-               the sidebar acts as an overlay/drawer */
             main {
                 margin-left: 0 !important;
             }
@@ -104,7 +102,7 @@
             color: #475569;
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
-            width: 40px; /* Slightly larger for touch */
+            width: 40px; 
             height: 40px;
             display: flex;
             align-items: center;
@@ -166,7 +164,7 @@
             <div id="login-form-container">
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-indigo-50">
-                        <!-- Icon replaced with LOGO_1.png -->
+                        <!-- Icon: LOGO_1.png -->
                         <img src="LOGO_1.png" alt="Tâm Đức Logo" class="w-12 h-12 object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
                     </div>
                     <h1 class="text-xl font-bold text-indigo-800 mb-1 uppercase tracking-tight">Xác thực truy cập</h1>
@@ -333,26 +331,26 @@
             </div>
         </div>
 
-        <!-- Top Left: Sidebar Toggle -->
+        <!-- Top Left: Sidebar Toggle & Mobile Select -->
         <div class="absolute top-4 left-4 z-40 flex gap-2">
             <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="glass-panel w-10 h-10 flex items-center justify-center rounded-lg text-indigo-600 hover:bg-white hover:text-indigo-700 transition-colors shadow-lg active:scale-95" title="Bảng điều khiển">
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
-            
-            <!-- Mobile Model Selection Shortcut -->
-            <div class="md:hidden">
-                <select onchange="loadPreset(this.value)" class="glass-panel bg-white/90 border border-indigo-100 text-indigo-700 text-[10px] font-bold py-2.5 px-3 rounded-lg shadow-lg focus:outline-none h-10">
-                    <option value="custom">Chọn mẫu nhanh</option>
-                    <option value="sphere">Mẫu: Hình cầu</option>
-                    <option value="bowl">Mẫu: Cái chén</option>
-                    <option value="pot">Mẫu: Chậu cây</option>
-                    <option value="hat">Mẫu: Cái nón</option>
-                    <option value="milktea">Mẫu: Trà sữa</option>
-                    <option value="vase">Mẫu: Bình hoa</option>
-                    <option value="wine">Mẫu: Bình rượu</option>
-                    <option value="drop">Mẫu: Giọt nước</option>
-                </select>
-            </div>
+        </div>
+
+        <!-- Mobile Model Selection Shortcut (Moved to top-20 to align with Logo) -->
+        <div class="md:hidden absolute top-20 left-4 z-40">
+            <select onchange="loadPreset(this.value)" class="glass-panel bg-white/90 border border-indigo-100 text-indigo-700 text-[10px] font-bold py-2.5 px-3 rounded-lg shadow-lg focus:outline-none h-10 min-w-[120px]">
+                <option value="custom">Chọn mẫu nhanh</option>
+                <option value="sphere">Mẫu: Hình cầu</option>
+                <option value="bowl">Mẫu: Cái chén</option>
+                <option value="pot">Mẫu: Chậu cây</option>
+                <option value="hat">Mẫu: Cái nón</option>
+                <option value="milktea">Mẫu: Trà sữa</option>
+                <option value="vase">Mẫu: Bình hoa</option>
+                <option value="wine">Mẫu: Bình rượu</option>
+                <option value="drop">Mẫu: Giọt nước</option>
+            </select>
         </div>
 
         <!-- Top Right: Legend -->
@@ -387,7 +385,7 @@
             const formContainer = document.getElementById('login-form-container');
             const successContainer = document.getElementById('login-success-container');
             
-            // Password updated as requested
+            // Reverted to tamducedu
             if (input.value === 'tde') {
                 formContainer.classList.add('hidden');
                 successContainer.classList.remove('hidden');
@@ -414,13 +412,12 @@
         // --- CONFIG & STATE ---
         const config = {
             colors: ['#4F46E5', '#DC2626', '#059669', '#D97706', '#9333EA'], 
-            defaultFunction: '', 
             segments: 64,
             defaultCameraPos: { x: 15, y: 10, z: 20 }
         };
 
         const presets = {
-            'custom': [{ expr: '', a: 0, b: 3 }],
+            'custom': [], 
             'sphere': [{ expr: 'sqrt(4-x^2)', a: -2, b: 2 }],
             'milktea': [
                 { expr: '(15*x)/134 + 4.5', a: -13.4, b: 0 },
@@ -591,18 +588,17 @@
             controls.target.set(0,0,0);
         }
 
-        function zoomCamera(zoomIn) {
-            const dir = new THREE.Vector3();
-            camera.getWorldDirection(dir);
-            camera.position.addScaledVector(dir, zoomIn ? 2 : -2);
-        }
-
         function loadPreset(key) {
-            if(key === "custom") return;
             state.functions.forEach(f => { if(f.mesh) scene.remove(f.mesh); if(f.line) scene.remove(f.line); });
             state.functions = [];
             document.getElementById('functions-container').innerHTML = '';
-            (presets[key] || presets['custom']).forEach(p => addFunctionInput(p.expr, p.a, p.b));
+            
+            const presetData = presets[key];
+            if (key === 'custom' || presetData.length === 0) {
+                addFunctionInput('', 0, 3); // Show empty input for Custom
+            } else {
+                presetData.forEach(p => addFunctionInput(p.expr, p.a, p.b));
+            }
             resetCamera();
         }
 
@@ -633,11 +629,21 @@
         function updateFunctionColor(id, val) { const f = state.functions.find(x=>x.id===id); if(f){ f.color=val; updateAllMeshes(); } }
         function updateFunctionBound(id, key, val) { const f = state.functions.find(x=>x.id===id); if(f){ f[key]=parseFloat(val); updateAllMeshes(); } }
         function toggleFunctionVisibility(id) { const f = state.functions.find(x=>x.id===id); if(f){ f.visible=!f.visible; updateAllMeshes(); } }
-        function removeFunction(id) { location.reload(); }
+        function removeFunction(id) { 
+            const idx = state.functions.findIndex(x=>x.id===id);
+            if(idx > -1) {
+                if(state.functions[idx].mesh) scene.remove(state.functions[idx].mesh);
+                if(state.functions[idx].line) scene.remove(state.functions[idx].line);
+                state.functions.splice(idx, 1);
+                updateAllMeshes();
+                const card = document.querySelector(`[onclick*="toggleFunctionVisibility(${id})"]`).closest('.bg-white');
+                if(card) card.remove();
+            }
+        }
 
         function insertMath(str, offset) {
-            // Find first active input as a fallback
-            const input = document.querySelector('#functions-container input[type="text"]');
+            const inputs = document.querySelectorAll('#functions-container input[type="text"]');
+            const input = inputs[inputs.length - 1]; // Use the last added one
             if (input) {
                 const start = input.selectionStart;
                 input.value = input.value.substring(0, start) + str + input.value.substring(input.selectionEnd);
@@ -645,6 +651,12 @@
                 input.setSelectionRange(start + str.length - offset, start + str.length - offset);
                 input.dispatchEvent(new Event('change'));
             }
+        }
+
+        function zoomCamera(zoomIn) {
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            camera.position.addScaledVector(dir, zoomIn ? 2 : -2);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
