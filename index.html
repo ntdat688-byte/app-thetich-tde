@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Thể Tích Khối Tròn Xoay</title>
+    
+    <!-- Tailwind CSS for UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js for 3D Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Math.js for safe function parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent scrolling on main body */
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        input[type="range"] {
+            accent-color: #4F46E5;
+        }
+
+        /* Smooth Sidebar Transition */
+        #sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 50; /* Higher z-index to overlay on mobile */
+        }
+        
+        /* When hidden, move it off-canvas to the left */
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        main {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 24rem; /* Default w-96 */
+            width: auto;
+        }
+
+        main.expanded {
+            margin-left: 0;
+        }
+
+        /* MOBILE RESPONSIVE FIXES */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 85vw; /* Slightly less than full width */
+                max-width: 320px;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            }
+            
+            /* On mobile, main content should NEVER have left margin, 
+               the sidebar acts as an overlay/drawer */
+            main {
+                margin-left: 0 !important;
+            }
+        }
+
+        .control-btn {
+            background: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .control-btn:hover {
+            background: #f8fafc;
+            color: #4F46E5;
+            border-color: #4F46E5;
+        }
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Select Styling */
+        select.custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        /* Disabled state for inputs when function is hidden */
+        .opacity-50-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Math Keyboard Button */
+        .math-key {
+            @apply bg-slate-100 text-slate-700 font-mono text-xs rounded py-1.5 hover:bg-indigo-100 hover:text-indigo-700 transition-colors border border-slate-200 active:scale-95 flex items-center justify-center font-bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen w-screen overflow-hidden relative">
+
+    <!-- Sidebar / Control Panel -->
+    <aside id="sidebar" class="w-96 bg-white border-r border-slate-200 flex flex-col shadow-2xl h-full">
+        
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 bg-indigo-600 text-white flex-shrink-0">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-cube"></i> Ứng Dụng Tích Phân
+                    </h1>
+                    <p class="text-xs text-indigo-100 mt-1 opacity-90">Mô phỏng thể tích khối tròn xoay</p>
+                </div>
+                <!-- Close button for mobile -->
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-indigo-200 transition-colors ml-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+            
+            <!-- Preset Selection -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mô hình mẫu</h2>
+                <select id="preset-select" onchange="loadPreset(this.value)" class="custom-select w-full bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 shadow-sm">
+                    <option value="custom">-- Tự do (Trống) --</option>
+                    <optgroup label="Cơ bản">
+                        <option value="sphere">Hình cầu</option>
+                        <option value="bowl">Cái chén</option>
+                        <option value="pot">Chậu trồng cây</option>
+                    </optgroup>
+                    <optgroup label="Nâng cao">
+                        <option value="hat">Cái nón (Mũ)</option> <!-- Moved to Advanced -->
+                        <option value="milktea">Ly trà sữa</option>
+                        <option value="vase">Bình Hoa</option>
+                        <option value="wine">Bình rượu vang</option>
+                        <option value="drop">Giọt nước (Thủy tinh)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- Functions List -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Hàm số</h2>
+                    <button onclick="addFunctionInput()" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md font-medium hover:bg-indigo-100 transition-colors">
+                        <i class="fa-solid fa-plus mr-1"></i> Thêm hàm
+                    </button>
+                </div>
+
+                <!-- Math Toolbar (Quick Input) -->
+                <div class="grid grid-cols-4 gap-2 mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <button onclick="insertMath('sqrt()', 1)" class="math-key" title="Căn bậc 2">√</button>
+                    <button onclick="insertMath('^2', 0)" class="math-key" title="Bình phương">x²</button>
+                    <button onclick="insertMath('^', 0)" class="math-key" title="Mũ">^</button>
+                    <button onclick="insertMath('pi', 0)" class="math-key" title="Số Pi">π</button>
+                    <button onclick="insertMath('sin()', 1)" class="math-key">sin</button>
+                    <button onclick="insertMath('cos()', 1)" class="math-key">cos</button>
+                    <button onclick="insertMath('/', 0)" class="math-key" title="Phân số">/</button>
+                    <button onclick="insertMath('()', 1)" class="math-key">( )</button>
+                </div>
+
+                <div id="functions-container" class="space-y-4">
+                    <!-- Dynamic inputs will appear here -->
+                </div>
+            </div>
+
+            <!-- Rotation Controls -->
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <h2 class="text-sm font-semibold text-indigo-800 uppercase tracking-wider mb-3">Góc xoay</h2>
+                
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-mono text-indigo-600 font-bold" id="angle-display">0°</span>
+                    <button id="btn-animate" class="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full shadow-sm border border-indigo-200 hover:bg-indigo-50 transition-all font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-play"></i> Tự động
+                    </button>
+                </div>
+                
+                <input type="range" id="slider-angle" min="0" max="6.28318" step="0.01" value="0" class="w-full cursor-pointer h-2 bg-indigo-200 rounded-lg appearance-none">
+            </div>
+            
+            <!-- View Settings -->
+             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Hiển thị</h2>
+                
+                <!-- Wireframe Toggle -->
+                <label class="flex items-center cursor-pointer justify-between">
+                    <span class="text-sm text-slate-600">Lưới khung dây (Wireframe)</span>
+                    <input type="checkbox" id="check-wireframe" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                </label>
+
+                <!-- Opacity Slider -->
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm text-slate-600">Độ trong suốt</span>
+                        <span class="text-xs font-mono text-slate-400" id="opacity-val">0.7</span>
+                    </div>
+                    <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.1" value="0.7" 
+                           class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    <p class="text-[10px] text-slate-400 mt-1">Kéo về thấp để nhìn xuyên thấu rõ hơn.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer in sidebar -->
+        <div class="p-3 border-t border-slate-200 bg-slate-50 text-center">
+            <div class="text-[10px] text-slate-400 mb-1">Mẹo: Dùng chuột trái xoay, chuột phải di chuyển, lăn chuột để zoom.</div>
+            <div class="text-[11px] font-bold text-red-600 uppercase tracking-wide">Thiết kế bởi: GV Nguyễn Thành Đạt</div>
+        </div>
+    </aside>
+
+    <!-- Main Canvas Area -->
+    <main id="main-area" class="h-full bg-slate-100 relative">
+        
+        <!-- FIXED TITLE (Top Center) -->
+        <div class="absolute top-4 left-0 w-full flex justify-center z-30 pointer-events-none">
+            <div class="bg-white/90 backdrop-blur-sm border border-indigo-100 text-indigo-800 font-bold uppercase text-sm px-4 py-2 rounded-full shadow-lg pointer-events-auto">
+                App học tập Hệ Thống Giáo Dục Tâm Đức
+            </div>
+        </div>
+
+        <!-- FIXED LOGO (Top Right) -->
+        <div class="absolute top-4 right-4 z-30 pointer-events-none">
+            <img src="LOGO_7 (2).png" alt="Logo Tam Duc" class="h-16 w-auto drop-shadow-md pointer-events-auto object-contain" onerror="this.style.display='none'">
+        </div>
+
+        <!-- FIXED FOOTER (Bottom Left) -->
+        <div class="absolute bottom-4 left-4 z-30 pointer-events-none">
+             <div class="text-xs font-bold text-red-600 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm pointer-events-auto uppercase tracking-wide">
+                Thiết kế bởi: GV Nguyễn Thành Đạt
+            </div>
+        </div>
+
+        <!-- Top Left: Sidebar Toggle -->
+        <div class="absolute top-4 left-4 z-40">
+            <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="glass-panel w-10 h-10 flex items-center justify-center rounded-lg text-indigo-600 hover:bg-white hover:text-indigo-700 transition-colors shadow-lg" title="Ẩn/Hiện Bảng điều khiển">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Top Right: Legend (Moved down slightly to avoid Logo) -->
+        <div class="absolute top-24 right-4 glass-panel px-4 py-2 rounded-lg shadow-sm pointer-events-none hidden md:block z-10">
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-500 rounded-full"></div> Ox (Trục xoay)</div>
+                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-green-500 rounded-full"></div> Oy</div>
+                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-blue-500 rounded-full"></div> Oz</div>
+            </div>
+        </div>
+
+        <!-- Bottom Right: Camera Controls -->
+        <div class="absolute bottom-6 right-6 z-40 flex flex-col gap-2">
+            <button onclick="resetCamera()" class="control-btn" title="Khôi phục góc nhìn">
+                <i class="fa-solid fa-house"></i>
+            </button>
+            <div class="h-px bg-slate-300 w-full my-1"></div>
+            <button onclick="zoomCamera(true)" class="control-btn" title="Phóng to">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <button onclick="zoomCamera(false)" class="control-btn" title="Thu nhỏ">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+        </div>
+
+        <div id="canvas-container" class="w-full h-full cursor-move"></div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+            <p class="text-slate-500 font-medium">Đang khởi tạo môi trường 3D...</p>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. CONFIGURATION & STATE ---
+        const config = {
+            colors: ['#4F46E5', '#DC2626', '#059669', '#D97706', '#9333EA'], 
+            defaultFunction: '', // Default empty for custom mode
+            segments: 64,
+            defaultCameraPos: { x: 15, y: 10, z: 20 } // Adjusted camera for larger models
+        };
+
+        const presets = {
+            'custom': [
+                { expr: '', a: 0, b: 3 }
+            ],
+            'sphere': [
+                { expr: 'sqrt(4-x^2)', a: -2, b: 2 }
+            ],
+            'milktea': [
+                // y=15x/134+9/2; x=-13.4 to 0 -> Converted: 15*x/134 + 4.5
+                { expr: '(15*x)/134 + 4.5', a: -13.4, b: 0 },
+                // y=sqrt(81/4-x^2); x=0 to sqrt(77)/2 -> 81/4 = 20.25, sqrt(77)/2 ≈ 4.387
+                { expr: 'sqrt(20.25 - x^2)', a: 0, b: 4.387 }
+            ],
+            'hat': [
+                // y=sqrt(1-x^2); x=-1 to 0
+                { expr: 'sqrt(1 - x^2)', a: -1, b: 0 },
+                // y=x^3+1; x=0 to 1
+                { expr: 'x^3 + 1', a: 0, b: 1 }
+            ],
+            'vase': [
+                // y=sin(x)+2; x=0 to 2pi
+                { expr: 'sin(x) + 2', a: 0, b: 6.28318 }
+            ],
+            'drop': [
+                // y= sqrt 4-x^ 2; -2 <= x <= 0.6
+                { expr: 'sqrt(4 - x^2)', a: -2, b: 0.6 },
+                // y= - sqrt 91 20 x+ (23sqrt(91))/100; 0.6 < x <= 4.6
+                // Converted: -(sqrt(91)/20)*x + (23*sqrt(91))/100
+                { expr: '-(sqrt(91)/20)*x + (23*sqrt(91))/100', a: 0.6, b: 4.6 }
+            ],
+            'bowl': [
+                // y=sqrt(x)+1; x=0 to 2
+                { expr: 'sqrt(x) + 1', a: 0, b: 2 }
+            ],
+            'wine': [
+                // y=sqrt((1-x^2/25)*9); x=-4 to 4
+                { expr: 'sqrt((1 - x^2/25) * 9)', a: -4, b: 4 }
+            ],
+            'pot': [
+                // y=sqrt(x+1); x=0 to 3
+                { expr: 'sqrt(x + 1)', a: 0, b: 3 }
+            ]
+        };
+
+        let state = {
+            functions: [], 
+            angle: 0, 
+            isAnimating: false,
+            wireframe: false,
+            opacity: 0.7, 
+            isSidebarVisible: true,
+            activeInputId: null // Tracks the last focused input for quick insertion
+        };
+
+        let scene, camera, renderer, controls;
+
+        // --- 2. THREE.JS SETUP ---
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf1f5f9);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(config.defaultCameraPos.x, config.defaultCameraPos.y, config.defaultCameraPos.z);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            backLight.position.set(-10, -10, -5);
+            scene.add(backLight);
+
+            // Helpers
+            setupHelpers();
+
+            // Resize Listener
+            window.addEventListener('resize', onWindowResize);
+
+            // Hide Loading
+            document.getElementById('loading').style.display = 'none';
+
+            // Start Loop
+            animate();
+        }
+
+        function setupHelpers() {
+            const axesHelper = new THREE.AxesHelper(15);
+            scene.add(axesHelper);
+
+            const gridHelper = new THREE.GridHelper(30, 30, 0xcbd5e1, 0xe2e8f0);
+            scene.add(gridHelper);
+            
+            // Highlight Ox axis (Red)
+            const geometry = new THREE.CylinderGeometry(0.05, 0.05, 30, 8);
+            const material = new THREE.MeshBasicMaterial({color: 0xffaaaa, transparent: true, opacity: 0.5});
+            const xAxisLine = new THREE.Mesh(geometry, material);
+            xAxisLine.rotation.z = Math.PI / 2;
+            scene.add(xAxisLine);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            
+            setTimeout(() => {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                if (width === 0 || height === 0) return;
+                
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }, 50);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (state.isAnimating) {
+                const step = 0.02; 
+                let newAngle = parseFloat(state.angle) + step;
+                
+                // Stop at 360 degrees (2*PI)
+                if (newAngle >= Math.PI * 2) {
+                    newAngle = Math.PI * 2; // Clamp to exactly 360
+                    state.isAnimating = false; // Stop animation
+                    
+                    // Update button UI back to "Auto" state
+                    const btnAnimate = document.getElementById('btn-animate');
+                    if(btnAnimate) {
+                        btnAnimate.innerHTML = '<i class="fa-solid fa-play"></i> Tự động';
+                    }
+                }
+                
+                state.angle = newAngle;
+                document.getElementById('slider-angle').value = newAngle;
+                updateAngleDisplay(newAngle);
+                updateAllMeshes();
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- 3. MATH & LOGIC ---
+
+        function generatePoints(expr, a, b) {
+            const points = [];
+            
+            // Safety Check: Avoid NaN or invalid bounds
+            if (isNaN(a) || isNaN(b) || a >= b) return null;
+
+            // Trim whitespace
+            if (!expr || expr.trim() === '') return null;
+
+            // Adaptive step size based on range length, but cap max points for performance
+            let segments = 150; 
+            const range = b - a;
+            const step = range / segments;
+            
+            if (step <= 0) return null;
+
+            try {
+                const compiled = math.compile(expr);
+                
+                for (let x = a; x <= b; x += step) {
+                    const scope = { x: x };
+                    let y = compiled.evaluate(scope);
+                    // Critical safety check for geometry generation
+                    if (isNaN(y) || !isFinite(y)) y = 0;
+                    
+                    // LatheGeometry revolves around Y. We map (y_func, x_val) -> Vector2(radius, height)
+                    points.push(new THREE.Vector2(Math.abs(y), x));
+                }
+                
+                // End point precise
+                let yEnd = compiled.evaluate({x: b});
+                if (isNaN(yEnd) || !isFinite(yEnd)) yEnd = 0;
+                points.push(new THREE.Vector2(Math.abs(yEnd), b));
+                
+            } catch (err) {
+                // console.error("Math parsing error:", err);
+                // Don't log spam for empty inputs
+                return null;
+            }
+            return points;
+        }
+
+        function createSolidMesh(points, color, angle) {
+            // LatheGeometry requires at least 2 points
+            if (!points || points.length < 2) return null;
+
+            const geometry = new THREE.LatheGeometry(points, config.segments, 0, angle);
+            
+            const material = new THREE.MeshPhysicalMaterial({
+                color: color,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: state.opacity,
+                depthWrite: false, 
+                metalness: 0.1,
+                roughness: 0.2,
+                clearcoat: 0.5,
+                clearcoatRoughness: 0.1,
+                wireframe: state.wireframe
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            // Rotate to align revolution axis with World X-axis
+            mesh.rotation.z = -Math.PI / 2;
+            return mesh;
+        }
+
+        function createLinePlot(points, color) {
+            if (!points || points.length < 2) return null;
+            // Map Vector2(radius, height) back to Vector3(x, y, 0) for the 2D plot line
+            // Remember: in generatePoints, Vector2(x=radius/y_val, y=height/x_val)
+            // So here: p.y is x_val, p.x is y_val
+            const linePoints = points.map(p => new THREE.Vector3(p.y, p.x, 0));
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
+            return new THREE.Line(geometry, material);
+        }
+
+        function updateAllMeshes() {
+            state.functions.forEach(funcObj => {
+                // 1. Clean up old meshes for this function
+                if (funcObj.mesh) {
+                    scene.remove(funcObj.mesh);
+                    if (funcObj.mesh.geometry) funcObj.mesh.geometry.dispose();
+                    if (funcObj.mesh.material) funcObj.mesh.material.dispose();
+                    funcObj.mesh = null;
+                }
+                if (funcObj.line) {
+                    scene.remove(funcObj.line);
+                    if (funcObj.line.geometry) funcObj.line.geometry.dispose();
+                    if (funcObj.line.material) funcObj.line.material.dispose();
+                    funcObj.line = null;
+                }
+                
+                // 2. If function is hidden, stop here (do not regenerate)
+                if (funcObj.visible === false) return;
+
+                // 3. Generate new if visible
+                const points = generatePoints(funcObj.expression, funcObj.a, funcObj.b);
+                
+                if (points && points.length >= 2) {
+                    if (state.angle > 0.01) {
+                        const mesh = createSolidMesh(points, funcObj.color, state.angle);
+                        if (mesh) {
+                            scene.add(mesh);
+                            funcObj.mesh = mesh;
+                        }
+                    }
+                    const line = createLinePlot(points, funcObj.color);
+                    if (line) {
+                        scene.add(line);
+                        funcObj.line = line;
+                    }
+                }
+            });
+        }
+
+        // --- 4. UI INTERACTION ---
+
+        function updateAngleDisplay(rad) {
+            const deg = Math.round(rad * (180/Math.PI));
+            document.getElementById('angle-display').innerText = `${deg}°`;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const main = document.getElementById('main-area');
+            const btnIcon = document.querySelector('#sidebar-toggle-btn i');
+            
+            state.isSidebarVisible = !state.isSidebarVisible;
+
+            if (state.isSidebarVisible) {
+                sidebar.classList.remove('sidebar-hidden');
+                main.classList.remove('expanded');
+                btnIcon.className = "fa-solid fa-bars text-lg"; 
+            } else {
+                sidebar.classList.add('sidebar-hidden');
+                main.classList.add('expanded');
+                btnIcon.className = "fa-solid fa-arrow-right text-lg"; 
+            }
+            
+            // Trigger resize to fix camera aspect ratio
+            setTimeout(onWindowResize, 350);
+        }
+
+        function resetCamera() {
+            controls.reset();
+            camera.position.set(config.defaultCameraPos.x, config.defaultCameraPos.y, config.defaultCameraPos.z);
+            controls.target.set(0,0,0);
+            controls.update();
+        }
+
+        function zoomCamera(zoomIn) {
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            const distance = zoomIn ? 2 : -2; 
+            camera.position.addScaledVector(direction, distance);
+            controls.update();
+        }
+
+        function clearAllFunctions() {
+            // Remove all meshes from scene
+            state.functions.forEach(f => {
+                if (f.mesh) scene.remove(f.mesh);
+                if (f.line) scene.remove(f.line);
+            });
+            state.functions = [];
+            document.getElementById('functions-container').innerHTML = '';
+        }
+
+        function loadPreset(presetKey) {
+            clearAllFunctions();
+            const data = presets[presetKey] || presets['custom'];
+            
+            data.forEach((item, index) => {
+                addFunctionInput(item.expr, item.a, item.b);
+            });
+
+            // Adjust camera if necessary for large models
+            if (presetKey === 'milktea') {
+                camera.position.set(0, 15, 25);
+                controls.target.set(-5, 0, 0);
+            } else if (presetKey === 'vase' || presetKey === 'drop' || presetKey === 'wine') {
+                camera.position.set(10, 5, 15); // Adjust for taller/wider objects
+                controls.target.set(0, 0, 0);
+            } else {
+                controls.target.set(0,0,0);
+                camera.position.set(config.defaultCameraPos.x, config.defaultCameraPos.y, config.defaultCameraPos.z);
+            }
+            controls.update();
+        }
+
+        function addFunctionInput(defaultExpr = '', defaultA = 0, defaultB = 3) {
+            const container = document.getElementById('functions-container');
+            const id = Date.now() + Math.random(); // Ensure unique ID
+            const color = config.colors[state.functions.length % config.colors.length];
+            const expr = defaultExpr;
+
+            const div = document.createElement('div');
+            div.className = "bg-white p-3 rounded-lg border border-slate-200 shadow-sm relative group animate-fade-in-down";
+            div.id = `func-card-${id}`;
+            // Escape quotes for HTML attributes
+            const safeExpr = expr.replace(/"/g, '&quot;');
+            
+            div.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <input type="color" value="${color}" onchange="updateFunctionColor(${id}, this.value)" class="w-6 h-6 p-0 border-0 rounded cursor-pointer" title="Chọn màu">
+                    
+                    <button id="btn-visible-${id}" onclick="toggleFunctionVisibility(${id})" class="ml-2 text-indigo-600 hover:text-indigo-800 transition-colors w-6 h-6 flex items-center justify-center" title="Ẩn/Hiện hàm số">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+
+                    <span class="text-xs font-bold text-slate-500 ml-1">y = f(x)</span>
+                    <button onclick="removeFunction(${id})" class="ml-auto text-slate-400 hover:text-red-500 transition-colors" title="Xóa hàm này"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                
+                <div id="func-inputs-${id}">
+                    <input type="text" id="input-expr-${id}" value="${safeExpr}" 
+                        onfocus="setActiveInput('${id}')"
+                        onchange="updateFunctionExpression(${id}, this.value)" 
+                        class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 text-sm font-mono text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-2" 
+                        placeholder="VD: x^2, sin(x)...">
+                    <div class="grid grid-cols-2 gap-2 border-t border-slate-100 pt-2">
+                        <div>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-0.5">Cận từ (a)</label>
+                            <input type="number" value="${defaultA}" step="0.5" onchange="updateFunctionBound(${id}, 'a', this.value)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-0.5">Cận đến (b)</label>
+                            <input type="number" value="${defaultB}" step="0.5" onchange="updateFunctionBound(${id}, 'b', this.value)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+
+            // Set as active if it's the first one or user just added it
+            state.activeInputId = id;
+
+            state.functions.push({ 
+                id, 
+                expression: expr, 
+                color, 
+                a: defaultA, 
+                b: defaultB, 
+                visible: true, 
+                mesh: null, 
+                line: null 
+            });
+            updateAllMeshes();
+        }
+
+        // --- MATH INPUT HELPERS ---
+
+        function setActiveInput(id) {
+            state.activeInputId = id;
+        }
+
+        function insertMath(str, offsetCursorBack = 0) {
+            if (!state.activeInputId) {
+                // Try to find the first input if none active
+                const firstFunc = state.functions[0];
+                if(firstFunc) state.activeInputId = firstFunc.id;
+                else return;
+            }
+
+            const input = document.getElementById(`input-expr-${state.activeInputId}`);
+            if (!input) return;
+
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end, text.length);
+            
+            input.value = before + str + after;
+            
+            // Move cursor inside parens if needed (e.g., sqrt(|))
+            const newPos = start + str.length - offsetCursorBack;
+            input.selectionStart = newPos;
+            input.selectionEnd = newPos;
+            
+            input.focus();
+
+            // Trigger update immediately
+            updateFunctionExpression(state.activeInputId, input.value);
+        }
+
+        function toggleFunctionVisibility(id) {
+            const func = state.functions.find(f => f.id === id);
+            if (!func) return;
+
+            // Toggle state
+            func.visible = !func.visible;
+
+            // Update Icon
+            const btn = document.getElementById(`btn-visible-${id}`);
+            const inputsDiv = document.getElementById(`func-inputs-${id}`);
+            
+            if (func.visible) {
+                btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                btn.className = "ml-2 text-indigo-600 hover:text-indigo-800 transition-colors w-6 h-6 flex items-center justify-center";
+                inputsDiv.classList.remove('opacity-50-disabled');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+                btn.className = "ml-2 text-slate-300 hover:text-slate-500 transition-colors w-6 h-6 flex items-center justify-center";
+                inputsDiv.classList.add('opacity-50-disabled');
+            }
+
+            // Update 3D Scene
+            updateAllMeshes();
+        }
+
+        function removeFunction(id) {
+            const index = state.functions.findIndex(f => f.id === id);
+            if (index > -1) {
+                const func = state.functions[index];
+                if (func.mesh) scene.remove(func.mesh);
+                if (func.line) scene.remove(func.line);
+                state.functions.splice(index, 1);
+                const el = document.getElementById(`func-card-${id}`);
+                if (el) el.remove();
+                
+                // If we removed the active input, clear it
+                if(state.activeInputId === id) state.activeInputId = null;
+            }
+        }
+
+        function updateFunctionExpression(id, newExpr) {
+            const func = state.functions.find(f => f.id === id);
+            if(func) { func.expression = newExpr; updateAllMeshes(); }
+        }
+        function updateFunctionColor(id, newColor) {
+            const func = state.functions.find(f => f.id === id);
+            if(func) { func.color = newColor; updateAllMeshes(); }
+        }
+        function updateFunctionBound(id, type, value) {
+            const func = state.functions.find(f => f.id === id);
+            if(func) { 
+                func[type] = parseFloat(value); 
+                updateAllMeshes(); 
+            }
+        }
+
+        // --- 5. EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initThree();
+            
+            // Responsive Init: Hide sidebar automatically on small screens
+            if (window.innerWidth < 768) {
+                state.isSidebarVisible = false;
+                document.getElementById('sidebar').classList.add('sidebar-hidden');
+                document.getElementById('main-area').classList.add('expanded');
+                document.querySelector('#sidebar-toggle-btn i').className = "fa-solid fa-arrow-right text-lg";
+            }
+
+            // Initial Load: Custom (Empty)
+            loadPreset('custom');
+            
+            const slider = document.getElementById('slider-angle');
+            slider.addEventListener('input', (e) => {
+                state.isAnimating = false;
+                document.getElementById('btn-animate').innerHTML = '<i class="fa-solid fa-play"></i> Tự động';
+                state.angle = parseFloat(e.target.value);
+                updateAngleDisplay(state.angle);
+                updateAllMeshes();
+            });
+
+            const btnAnimate = document.getElementById('btn-animate');
+            btnAnimate.addEventListener('click', () => {
+                // If currently at max angle (360) and user clicks play, reset to 0
+                if (!state.isAnimating && state.angle >= Math.PI * 2 - 0.01) {
+                    state.angle = 0;
+                    document.getElementById('slider-angle').value = 0;
+                    updateAngleDisplay(0);
+                    updateAllMeshes();
+                }
+
+                state.isAnimating = !state.isAnimating;
+                btnAnimate.innerHTML = state.isAnimating ? '<i class="fa-solid fa-pause"></i> Dừng' : '<i class="fa-solid fa-play"></i> Tự động';
+            });
+
+            document.getElementById('check-wireframe').addEventListener('change', (e) => {
+                state.wireframe = e.target.checked;
+                updateAllMeshes();
+            });
+
+            const opacitySlider = document.getElementById('slider-opacity');
+            const opacityVal = document.getElementById('opacity-val');
+            opacitySlider.addEventListener('input', (e) => {
+                state.opacity = parseFloat(e.target.value);
+                opacityVal.innerText = state.opacity;
+                updateAllMeshes();
+            });
+        });
+
+    </script>
+</body>
+</html>
