@@ -338,7 +338,7 @@
             </button>
         </div>
 
-        <!-- Mobile Model Selection Shortcut (Moved to top-20 to align with Logo) -->
+        <!-- Mobile Model Selection Shortcut -->
         <div class="md:hidden absolute top-20 left-4 z-40">
             <select onchange="loadPreset(this.value)" class="glass-panel bg-white/90 border border-indigo-100 text-indigo-700 text-[10px] font-bold py-2.5 px-3 rounded-lg shadow-lg focus:outline-none h-10 min-w-[120px]">
                 <option value="custom">Chọn mẫu nhanh</option>
@@ -385,7 +385,7 @@
             const formContainer = document.getElementById('login-form-container');
             const successContainer = document.getElementById('login-success-container');
             
-            // Reverted to tamducedu
+            // Reverted to original password requirement
             if (input.value === 'tde') {
                 formContainer.classList.add('hidden');
                 successContainer.classList.remove('hidden');
@@ -589,13 +589,18 @@
         }
 
         function loadPreset(key) {
+            // Ngừng hoạt động xoay và reset góc về 0 khi chọn mô hình mới
+            state.isAnimating = false;
+            updateAnimateButtonsState(false);
+            setAngle(0);
+
             state.functions.forEach(f => { if(f.mesh) scene.remove(f.mesh); if(f.line) scene.remove(f.line); });
             state.functions = [];
             document.getElementById('functions-container').innerHTML = '';
             
             const presetData = presets[key];
             if (key === 'custom' || presetData.length === 0) {
-                addFunctionInput('', 0, 3); // Show empty input for Custom
+                addFunctionInput('', 0, 3); // Hiện sẵn ô nhập cho chế độ Tự do
             } else {
                 presetData.forEach(p => addFunctionInput(p.expr, p.a, p.b));
             }
@@ -643,7 +648,7 @@
 
         function insertMath(str, offset) {
             const inputs = document.querySelectorAll('#functions-container input[type="text"]');
-            const input = inputs[inputs.length - 1]; // Use the last added one
+            const input = inputs[inputs.length - 1]; 
             if (input) {
                 const start = input.selectionStart;
                 input.value = input.value.substring(0, start) + str + input.value.substring(input.selectionEnd);
