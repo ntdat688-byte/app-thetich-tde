@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mô Phỏng Thể Tích Khối Tròn Xoay</title>
     
     <!-- Tailwind CSS for UI -->
@@ -93,14 +93,19 @@
                 margin-left: 0 !important;
             }
         }
+        
+        /* Crucial for mobile 3D interaction: prevents page scrolling when touching canvas */
+        #canvas-container {
+            touch-action: none; 
+        }
 
         .control-btn {
             background: white;
             color: #475569;
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
-            width: 36px;
-            height: 36px;
+            width: 40px; /* Slightly larger for touch */
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -136,7 +141,7 @@
 
         /* Math Keyboard Button */
         .math-key {
-            @apply bg-slate-100 text-slate-700 font-mono text-xs rounded py-1.5 hover:bg-indigo-100 hover:text-indigo-700 transition-colors border border-slate-200 active:scale-95 flex items-center justify-center font-bold;
+            @apply bg-slate-100 text-slate-700 font-mono text-xs rounded py-2 hover:bg-indigo-100 hover:text-indigo-700 transition-colors border border-slate-200 active:scale-95 flex items-center justify-center font-bold shadow-sm select-none;
         }
     </style>
 </head>
@@ -155,7 +160,7 @@
                     <p class="text-xs text-indigo-100 mt-1 opacity-90">Mô phỏng thể tích khối tròn xoay</p>
                 </div>
                 <!-- Close button for mobile -->
-                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-indigo-200 transition-colors ml-2">
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-indigo-200 transition-colors ml-2 p-2">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -188,7 +193,7 @@
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Hàm số</h2>
-                    <button onclick="addFunctionInput()" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md font-medium hover:bg-indigo-100 transition-colors">
+                    <button onclick="addFunctionInput()" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-md font-medium hover:bg-indigo-100 transition-colors">
                         <i class="fa-solid fa-plus mr-1"></i> Thêm hàm
                     </button>
                 </div>
@@ -210,7 +215,7 @@
                 </div>
             </div>
 
-            <!-- Rotation Controls -->
+            <!-- Rotation Controls (Sidebar) -->
             <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                 <h2 class="text-sm font-semibold text-indigo-800 uppercase tracking-wider mb-3">Góc xoay</h2>
                 
@@ -229,9 +234,9 @@
                 <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Hiển thị</h2>
                 
                 <!-- Wireframe Toggle -->
-                <label class="flex items-center cursor-pointer justify-between">
+                <label class="flex items-center cursor-pointer justify-between p-1 hover:bg-slate-100 rounded transition-colors">
                     <span class="text-sm text-slate-600">Lưới khung dây (Wireframe)</span>
-                    <input type="checkbox" id="check-wireframe" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                    <input type="checkbox" id="check-wireframe" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
                 </label>
 
                 <!-- Opacity Slider -->
@@ -259,19 +264,30 @@
     <main id="main-area" class="h-full bg-slate-100 relative">
         
         <!-- FIXED TITLE (Top Center) -->
-        <div class="absolute top-4 left-0 w-full flex justify-center z-30 pointer-events-none">
-            <div class="bg-white/90 backdrop-blur-sm border border-indigo-100 text-indigo-800 font-bold uppercase text-sm px-4 py-2 rounded-full shadow-lg pointer-events-auto">
+        <div class="absolute top-4 left-0 w-full flex justify-center z-30 pointer-events-none px-12 md:px-0">
+            <div class="bg-white/90 backdrop-blur-sm border border-indigo-100 text-indigo-800 font-bold uppercase text-[10px] md:text-sm px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-lg pointer-events-auto text-center truncate max-w-full">
                 App học tập Hệ Thống Giáo Dục Tâm Đức
             </div>
         </div>
 
         <!-- FIXED LOGO (Top Right) -->
         <div class="absolute top-4 right-4 z-30 pointer-events-none">
-            <img src="LOGO_7 (2).png" alt="Logo Tam Duc" class="h-16 w-auto drop-shadow-md pointer-events-auto object-contain" onerror="this.style.display='none'">
+            <img src="LOGO_7 (2).png" alt="Logo Tam Duc" class="h-12 md:h-16 w-auto drop-shadow-md pointer-events-auto object-contain" onerror="this.style.display='none'">
+        </div>
+
+        <!-- FIXED FLOATING ROTATION CONTROLS (Bottom Center) -->
+        <div class="absolute bottom-16 md:bottom-8 left-1/2 transform -translate-x-1/2 z-30 bg-white/90 backdrop-blur-md border border-indigo-100 p-2 md:p-3 rounded-2xl shadow-xl flex items-center gap-3 w-[90%] md:w-auto max-w-md pointer-events-auto">
+            <button id="btn-animate-float" class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors shadow-md active:scale-95 flex-shrink-0" title="Tự động xoay">
+                <i class="fa-solid fa-play"></i>
+            </button>
+            <div class="flex-1 min-w-[120px]">
+                <input type="range" id="slider-angle-float" min="0" max="6.28318" step="0.01" value="0" class="w-full cursor-pointer h-2 bg-indigo-200 rounded-lg appearance-none accent-indigo-600">
+            </div>
+            <span id="angle-display-float" class="text-xs font-mono font-bold text-indigo-700 w-10 text-right">0°</span>
         </div>
 
         <!-- FIXED FOOTER (Bottom Left) -->
-        <div class="absolute bottom-4 left-4 z-30 pointer-events-none">
+        <div class="absolute bottom-4 left-4 z-30 pointer-events-none hidden md:block">
              <div class="text-xs font-bold text-red-600 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm pointer-events-auto uppercase tracking-wide">
                 Thiết kế bởi: GV Nguyễn Thành Đạt
             </div>
@@ -279,13 +295,13 @@
 
         <!-- Top Left: Sidebar Toggle -->
         <div class="absolute top-4 left-4 z-40">
-            <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="glass-panel w-10 h-10 flex items-center justify-center rounded-lg text-indigo-600 hover:bg-white hover:text-indigo-700 transition-colors shadow-lg" title="Ẩn/Hiện Bảng điều khiển">
+            <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="glass-panel w-10 h-10 flex items-center justify-center rounded-lg text-indigo-600 hover:bg-white hover:text-indigo-700 transition-colors shadow-lg active:scale-95" title="Ẩn/Hiện Bảng điều khiển">
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
         </div>
 
         <!-- Top Right: Legend (Moved down slightly to avoid Logo) -->
-        <div class="absolute top-24 right-4 glass-panel px-4 py-2 rounded-lg shadow-sm pointer-events-none hidden md:block z-10">
+        <div class="absolute top-20 md:top-24 right-4 glass-panel px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-sm pointer-events-none hidden md:block z-10">
             <div class="flex items-center gap-4 text-xs font-mono">
                 <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-500 rounded-full"></div> Ox (Trục xoay)</div>
                 <div class="flex items-center gap-1"><div class="w-3 h-3 bg-green-500 rounded-full"></div> Oy</div>
@@ -373,7 +389,7 @@
             functions: [], 
             angle: 0, 
             isAnimating: false,
-            wireframe: false,
+            wireframe: true, // Default to true (Auto observe mode)
             opacity: 0.7, 
             isSidebarVisible: true,
             activeInputId: null // Tracks the last focused input for quick insertion
@@ -475,17 +491,10 @@
                     newAngle = Math.PI * 2; // Clamp to exactly 360
                     state.isAnimating = false; // Stop animation
                     
-                    // Update button UI back to "Auto" state
-                    const btnAnimate = document.getElementById('btn-animate');
-                    if(btnAnimate) {
-                        btnAnimate.innerHTML = '<i class="fa-solid fa-play"></i> Tự động';
-                    }
+                    updateAnimateButtonsState(false);
                 }
                 
-                state.angle = newAngle;
-                document.getElementById('slider-angle').value = newAngle;
-                updateAngleDisplay(newAngle);
-                updateAllMeshes();
+                setAngle(newAngle);
             }
 
             controls.update();
@@ -616,8 +625,52 @@
 
         function updateAngleDisplay(rad) {
             const deg = Math.round(rad * (180/Math.PI));
-            document.getElementById('angle-display').innerText = `${deg}°`;
+            const displayStr = `${deg}°`;
+            // Update sidebar display
+            const sbDisplay = document.getElementById('angle-display');
+            if(sbDisplay) sbDisplay.innerText = displayStr;
+            // Update floating display
+            const floatDisplay = document.getElementById('angle-display-float');
+            if(floatDisplay) floatDisplay.innerText = displayStr;
         }
+
+        function updateSliders(val) {
+             const sbSlider = document.getElementById('slider-angle');
+             if(sbSlider) sbSlider.value = val;
+             const floatSlider = document.getElementById('slider-angle-float');
+             if(floatSlider) floatSlider.value = val;
+        }
+
+        function setAngle(newAngle) {
+            state.angle = parseFloat(newAngle);
+            updateSliders(state.angle);
+            updateAngleDisplay(state.angle);
+            updateAllMeshes();
+        }
+        
+        function updateAnimateButtonsState(isAnim) {
+             const html = isAnim ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+             const textHtml = isAnim ? '<i class="fa-solid fa-pause"></i> Dừng' : '<i class="fa-solid fa-play"></i> Tự động';
+
+             // Sidebar button
+             const btn = document.getElementById('btn-animate');
+             if(btn) btn.innerHTML = textHtml;
+             
+             // Floating button
+             const btnFloat = document.getElementById('btn-animate-float');
+             if(btnFloat) btnFloat.innerHTML = html; // Just icon
+        }
+
+        function toggleAnimation() {
+             // If currently at max angle (360) and user clicks play, reset to 0
+            if (!state.isAnimating && state.angle >= Math.PI * 2 - 0.01) {
+                setAngle(0);
+            }
+
+            state.isAnimating = !state.isAnimating;
+            updateAnimateButtonsState(state.isAnimating);
+        }
+
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -842,6 +895,13 @@
         // --- 5. EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
             initThree();
+
+            // --- Auto Wireframe Check ---
+            // Ensure the checkbox UI reflects the default state
+            const wireframeCheck = document.getElementById('check-wireframe');
+            if (wireframeCheck) {
+                wireframeCheck.checked = state.wireframe;
+            }
             
             // Responsive Init: Hide sidebar automatically on small screens
             if (window.innerWidth < 768) {
@@ -854,28 +914,33 @@
             // Initial Load: Custom (Empty)
             loadPreset('custom');
             
+            // --- Sync Sidebar Slider ---
             const slider = document.getElementById('slider-angle');
             slider.addEventListener('input', (e) => {
                 state.isAnimating = false;
-                document.getElementById('btn-animate').innerHTML = '<i class="fa-solid fa-play"></i> Tự động';
-                state.angle = parseFloat(e.target.value);
-                updateAngleDisplay(state.angle);
-                updateAllMeshes();
+                updateAnimateButtonsState(false);
+                setAngle(e.target.value);
             });
+            
+            // --- Sync Floating Slider ---
+            const sliderFloat = document.getElementById('slider-angle-float');
+            if(sliderFloat) {
+                sliderFloat.addEventListener('input', (e) => {
+                    state.isAnimating = false;
+                    updateAnimateButtonsState(false);
+                    setAngle(e.target.value);
+                });
+            }
 
+            // --- Sidebar Animate Button ---
             const btnAnimate = document.getElementById('btn-animate');
-            btnAnimate.addEventListener('click', () => {
-                // If currently at max angle (360) and user clicks play, reset to 0
-                if (!state.isAnimating && state.angle >= Math.PI * 2 - 0.01) {
-                    state.angle = 0;
-                    document.getElementById('slider-angle').value = 0;
-                    updateAngleDisplay(0);
-                    updateAllMeshes();
-                }
-
-                state.isAnimating = !state.isAnimating;
-                btnAnimate.innerHTML = state.isAnimating ? '<i class="fa-solid fa-pause"></i> Dừng' : '<i class="fa-solid fa-play"></i> Tự động';
-            });
+            btnAnimate.addEventListener('click', toggleAnimation);
+            
+            // --- Floating Animate Button ---
+            const btnAnimateFloat = document.getElementById('btn-animate-float');
+            if(btnAnimateFloat) {
+                btnAnimateFloat.addEventListener('click', toggleAnimation);
+            }
 
             document.getElementById('check-wireframe').addEventListener('change', (e) => {
                 state.wireframe = e.target.checked;
