@@ -384,7 +384,12 @@
                 }, { once: true });
             }
         }
-        document.getElementById('password-input').addEventListener('keypress', e => { if (e.key === 'Enter') checkLogin(); });
+        document.getElementById('password-input').addEventListener('keypress', e => { 
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkLogin(); 
+            }
+        });
 
         const config = {
             colors: ['#4F46E5', '#DC2626', '#059669', '#D97706', '#9333EA'], 
@@ -457,6 +462,25 @@
             window.addEventListener('resize', onWindowResize);
             document.getElementById('loading').style.display = 'none';
             animate();
+        }
+
+        // --- FIX: MEMORY LEAK PREVENTION ---
+        function dispose3DObject(object) {
+            if (!object) return;
+            
+            // Dispose Geometry
+            if (object.geometry) {
+                object.geometry.dispose();
+            }
+
+            // Dispose Material(s)
+            if (object.material) {
+                if (Array.isArray(object.material)) {
+                    object.material.forEach(material => material.dispose());
+                } else {
+                    object.material.dispose();
+                }
+            }
         }
 
         function setupAdaptiveAxes() {
@@ -657,9 +681,20 @@
 
         function updateAllMeshes() {
             state.functions.forEach(f => {
-                if (f.mesh) scene.remove(f.mesh);
-                if (f.line) scene.remove(f.line);
+                // CLEANUP OLD MESHES
+                if (f.mesh) {
+                    scene.remove(f.mesh);
+                    dispose3DObject(f.mesh); // Dispose Geometry & Material
+                    f.mesh = null;
+                }
+                if (f.line) {
+                    scene.remove(f.line);
+                    dispose3DObject(f.line); // Dispose Geometry & Material
+                    f.line = null;
+                }
+                
                 if (!f.visible) return;
+                
                 const pts = generatePoints(f.expression, f.a, f.b);
                 if (pts) {
                     if (state.angle > 0.01) {
@@ -716,9 +751,15 @@
             state.isAnimating = false;
             updateAnimateButtonsState(false);
             setAngle(0);
-            state.functions.forEach(f => { if(f.mesh) scene.remove(f.mesh); if(f.line) scene.remove(f.line); });
+
+            // Clean up existing meshes properly
+            state.functions.forEach(f => { 
+                if(f.mesh) { scene.remove(f.mesh); dispose3DObject(f.mesh); }
+                if(f.line) { scene.remove(f.line); dispose3DObject(f.line); }
+            });
             state.functions = [];
             document.getElementById('functions-container').innerHTML = '';
+            
             const presetData = presets[key];
             if (key === 'custom' || presetData.length === 0) {
                 addFunctionInput('', 0, 3); 
@@ -758,8 +799,16 @@
         function removeFunction(id) { 
             const idx = state.functions.findIndex(x=>x.id===id);
             if(idx > -1) {
-                if(state.functions[idx].mesh) scene.remove(state.functions[idx].mesh);
-                if(state.functions[idx].line) scene.remove(state.functions[idx].line);
+                // CLEANUP ON REMOVE
+                if(state.functions[idx].mesh) {
+                    scene.remove(state.functions[idx].mesh);
+                    dispose3DObject(state.functions[idx].mesh);
+                }
+                if(state.functions[idx].line) {
+                    scene.remove(state.functions[idx].line);
+                    dispose3DObject(state.functions[idx].line);
+                }
+                
                 state.functions.splice(idx, 1);
                 updateAllMeshes();
                 const card = document.querySelector(`[onclick*="toggleFunctionVisibility(${id})"]`).closest('.bg-white');
