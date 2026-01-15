@@ -520,7 +520,11 @@
             ctx.font = 'italic bold 100px "Noto Serif", serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(text, 128, 128);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+                map: new THREE.CanvasTexture(canvas), 
+                transparent: true,
+                depthWrite: false // Helps with transparency sorting
+            }));
             return sprite;
         }
 
@@ -593,9 +597,9 @@
             const labelScale = Math.max(1.5, dist / 10);
             Object.values(axisElements.labels).forEach(l => l.scale.set(labelScale, labelScale, 1));
             
-            // Origin Label - Make SMALLER
-            axisElements.labels.o.position.set(-0.4, -0.4, 0);
-            axisElements.labels.o.scale.set(labelScale * 0.6, labelScale * 0.6, 1);
+            // Origin Label - Make SMALLER and POSITION correctly based on scale
+            axisElements.labels.o.position.set(-0.2 * labelScale, -0.2 * labelScale, 0);
+            axisElements.labels.o.scale.set(labelScale * 0.5, labelScale * 0.5, 1);
         }
 
         function onWindowResize() {
